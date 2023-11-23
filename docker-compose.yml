@@ -1,0 +1,44 @@
+version: "3.1"
+services:
+    db_db:
+        container_name: db_db
+        image: mysql:latest
+        ports: 
+            - "3306:3306"
+        environment:
+            MYSQL_USER: admlinux
+            MYSQL_DATABASE: db_datos
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: secret 
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            - persistent:/var/lib/mysql
+        networks:
+            - default
+    www_db:
+        container_name: www_db
+        build: .
+        ports: 
+            - "80:80"
+        volumes:
+            - ./html:/var/www/html
+        links:
+            - db_db
+        networks:
+            - default
+    phpmyadmin_bd:
+        container_name: phpmyadmin_bd
+        image: phpmyadmin:latest
+        links: 
+            - db_db
+        ports:
+            - 8000:80
+        depends_on:
+            - db_db
+        environment:
+            PMA_HOST: db_db
+            MYSQL_USER: root
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: secret
+volumes:
+    persistent:
